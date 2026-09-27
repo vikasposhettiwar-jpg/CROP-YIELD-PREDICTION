@@ -1,0 +1,24 @@
+{
+  "features": [
+    "humidity",
+    "rainfall",
+    "temperature",
+    "soil_type_black",
+    "soil_type_red",
+    "soil_type_alluvial",
+    "soil_type_sandy",
+    "soil_type_laterite",
+    "soil_type_loamy"
+  ],
+  "importances": [
+    0.5400807627636044,
+    0.23930225026019153,
+    0.19193606661083634,
+    0.022825828501835427,
+    0.0031281021382449613,
+    0.002578225923859414,
+    0.00011107466430163113,
+    2.1004686098375088e-05,
+    1.6684451027999997e-05
+  ]
+}

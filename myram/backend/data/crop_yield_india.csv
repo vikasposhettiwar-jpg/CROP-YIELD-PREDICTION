@@ -1,0 +1,61 @@
+state,district,year,crop,soil_type,temperature,rainfall,humidity,yield_ton_per_hectare
+Punjab,Ludhiana,2018,wheat,alluvial,18,72,58,4.20
+Punjab,Amritsar,2019,wheat,alluvial,17,68,56,4.10
+Haryana,Karnal,2020,wheat,alluvial,16,75,60,4.32
+Uttar Pradesh,Meerut,2021,wheat,alluvial,19,80,62,4.05
+Madhya Pradesh,Indore,2019,wheat,black,20,66,54,3.82
+Bihar,Patna,2018,wheat,alluvial,18,84,64,3.98
+West Bengal,Nadia,2020,rice,alluvial,29,180,86,4.95
+West Bengal,Hooghly,2021,rice,alluvial,28,195,88,5.10
+Odisha,Cuttack,2019,rice,red,30,210,90,4.60
+Chhattisgarh,Raipur,2020,rice,red,31,220,89,4.72
+Andhra Pradesh,Guntur,2021,rice,loamy,32,200,85,5.25
+Tamil Nadu,Thanjavur,2018,rice,alluvial,30,170,82,4.85
+Maharashtra,Pune,2019,sugarcane,black,28,130,68,7.80
+Maharashtra,Kolhapur,2020,sugarcane,black,27,140,70,8.20
+Uttar Pradesh,Saharanpur,2021,sugarcane,alluvial,26,125,66,7.40
+Karnataka,Belagavi,2018,sugarcane,black,29,145,72,7.95
+Tamil Nadu,Erode,2019,sugarcane,red,30,120,65,7.10
+Bihar,Muzaffarpur,2020,sugarcane,alluvial,27,118,64,7.05
+Gujarat,Rajkot,2018,cotton,black,31,82,52,2.45
+Maharashtra,Jalgaon,2019,cotton,black,32,95,55,2.62
+Telangana,Warangal,2020,cotton,red,30,88,50,2.38
+Punjab,Bathinda,2021,cotton,sandy,33,70,48,2.05
+Rajasthan,Sri Ganganagar,2020,cotton,sandy,34,60,44,1.92
+Haryana,Hisar,2019,cotton,alluvial,32,78,49,2.22
+Karnataka,Mysuru,2018,maize,red,24,110,62,3.85
+Bihar,Gaya,2019,maize,alluvial,25,120,65,3.95
+Madhya Pradesh,Bhopal,2020,maize,black,26,105,60,3.72
+Andhra Pradesh,Anantapur,2021,maize,red,27,98,58,3.66
+Rajasthan,Kota,2018,maize,alluvial,24,90,55,3.50
+Uttar Pradesh,Varanasi,2020,maize,alluvial,25,115,63,3.90
+Assam,Kamrup,2021,rice,alluvial,29,240,92,5.30
+Kerala,Palakkad,2020,rice,laterite,28,260,93,5.12
+Jharkhand,Ranchi,2019,rice,red,27,230,91,4.68
+Odisha,Sambalpur,2018,rice,red,31,205,88,4.55
+Tamil Nadu,Coimbatore,2021,maize,loamy,26,102,59,3.78
+Gujarat,Anand,2020,wheat,loamy,19,76,57,3.88
+Karnataka,Dharwad,2019,wheat,black,20,70,53,3.75
+Maharashtra,Nagpur,2021,wheat,black,21,64,50,3.62
+Uttar Pradesh,Lucknow,2018,wheat,alluvial,18,82,61,4.02
+Bihar,Begusarai,2021,wheat,alluvial,17,85,63,4.00
+Punjab,Ferozepur,2020,wheat,alluvial,,74,59,4.18
+West Bengal,Malda,2019,rice,alluvial,29,,87,4.88
+Chhattisgarh,Durg,2021,rice,red,30,215,,4.64
+Maharashtra,Satara,2020,sugarcane,black,28,138,69,8.05
+Tamil Nadu,Salem,2019,sugarcane,red,31,122,64,7.02
+Gujarat,Bhavnagar,2021,cotton,black,33,85,51,2.48
+Telangana,Karimnagar,2018,cotton,red,31,92,52,2.41
+Karnataka,Ballari,2020,cotton,black,32,76,47,2.26
+Bihar,Purnia,2021,maize,alluvial,24,118,66,3.99
+Madhya Pradesh,Jabalpur,2019,maize,black,25,108,61,3.74
+Andhra Pradesh,Kurnool,2018,maize,red,27,96,57,3.60
+Kerala,Thrissur,2019,rice,laterite,28,255,94,5.06
+Assam,Nagaon,2020,rice,alluvial,30,245,93,5.22
+Rajasthan,Jaipur,2021,wheat,sandy,22,52,42,3.12
+Rajasthan,Jodhpur,2020,maize,sandy,28,62,43,2.98
+Gujarat,Surat,2019,sugarcane,alluvial,29,132,67,7.62
+Haryana,Rohtak,2021,wheat,alluvial,18,70,58,4.08
+Punjab,Patiala,2018,wheat,alluvial,17,69,57,4.15
+Odisha,Puri,2021,rice,alluvial,30,225,90,4.92
+Tamil Nadu,Trichy,2020,rice,loamy,31,188,84,5.01

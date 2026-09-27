@@ -1,0 +1,43 @@
+{
+  "soil_crop_mean": {
+    "black": {
+      "sugarcane": 8.0,
+      "maize": 3.7300000000000004,
+      "wheat": 3.73,
+      "cotton": 2.4525
+    },
+    "alluvial": {
+      "sugarcane": 7.3566666666666665,
+      "rice": 5.031428571428571,
+      "wheat": 4.108,
+      "maize": 3.835,
+      "cotton": 2.22
+    },
+    "red": {
+      "sugarcane": 7.06,
+      "rice": 4.638,
+      "maize": 3.703333333333333,
+      "cotton": 2.395
+    },
+    "loamy": {
+      "rice": 5.13,
+      "wheat": 3.88,
+      "maize": 3.78
+    },
+    "laterite": {
+      "rice": 5.09
+    },
+    "sandy": {
+      "wheat": 3.12,
+      "maize": 2.98,
+      "cotton": 1.9849999999999999
+    }
+  },
+  "overall_crop_mean": {
+    "sugarcane": 7.576666666666666,
+    "rice": 4.928125,
+    "wheat": 3.951333333333333,
+    "maize": 3.6972727272727273,
+    "cotton": 2.31
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "features": [
+    "crop_sugarcane",
+    "season_whole year",
+    "humidity",
+    "crop_cotton",
+    "crop_rice",
+    "rainfall",
+    "temperature",
+    "season_kharif",
+    "soil_type_red",
+    "soil_type_alluvial"
+  ],
+  "importances": [
+    0.2973830409038582,
+    0.2839674878649274,
+    0.1382794373140161,
+    0.11237159701859302,
+    0.05952238740083244,
+    0.05399542751008266,
+    0.032303548951740785,
+    0.010125077834811144,
+    0.0034027496578320454,
+    0.0024615238205879706
+  ]
+}

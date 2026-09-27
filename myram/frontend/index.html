@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Crop Yield Prediction & Recommendation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="min-h-screen">
+    <div
+      id="root"
+      class="min-h-screen bg-cover bg-center bg-fixed"
+      style="background-image: url('https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=1600&q=80')"
+    ></div>
+
+    <script type="text/babel">
+      const { useEffect, useMemo, useRef, useState } = React;
+      const API_BASE = "http://127.0.0.1:5002";
+
+      const COUNTRY_OPTIONS = ["india"];
+      const STATE_OPTIONS = [
+        "punjab",
+        "haryana",
+        "uttar pradesh",
+        "maharashtra",
+        "karnataka",
+        "tamil nadu",
+        "rajasthan",
+        "west bengal",
+        "andhra pradesh",
+        "telangana",
+        "madhya pradesh",
+      ];
+      const SEASON_OPTIONS = ["kharif", "rabi", "zaid", "whole year"];
+      const SOIL_OPTIONS = ["black", "red", "alluvial"];
+      const CROP_OPTIONS = ["rice", "cotton", "maize", "soybean", "wheat", "groundnut", "pulses"];
+
+      const createYearRecord = (year = new Date().getFullYear()) => ({
+        year,
+        country: "india",
+        state: "",
+        district: "",
+        crop: "",
+        season: "",
+        temperature: "",
+        rainfall: "",
+        humidity: "",
+        soil_type: "",
+        // Optional actual yield entered in quintal/acre.
+        actual_yield_quintal_per_acre: "",
+      });
+
+      function validateRecord(record, idx) {
+        const required = ["year", "country", "state", "district", "crop", "season", "temperature", "rainfall", "humidity", "soil_type"];
+        for (const field of required) {
+          if (record[field] === "" || record[field] === null || record[field] === undefined) {
+            return `Year ${idx + 1}: ${field.replaceAll("_", " ")} is required.`;
+          }
+        }
+        if (Number(record.rainfall) < 0 || Number(record.temperature) < 0 || Number(record.humidity) < 0) {
+          return `Year ${idx + 1}: temperature, rainfall, and humidity cannot be negative.`;
+        }
+        if (Number(record.humidity) > 100) return `Year ${idx + 1}: humidity must be <= 100%.`;
+        return null;
+      }
+
+      function YieldChart({ results }) {
+        const canvasRef = useRef(null);
+        const chartRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !results?.length) return;
+          if (chartRef.current) chartRef.current.destroy();
+          const labels = results.map((x) => String(x.year));
+          const predicted = results.map((x) => x.predicted_yield_quintal_per_acre);
+          const actual = results.map((x) => x.actual_yield_quintal_per_acre ?? null);
+
+          chartRef.current = new Chart(canvasRef.current, {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Predicted Yield (q/acre)",
+                  data: predicted,
+                  backgroundColor: "rgba(52, 211, 153, 0.7)",
+                  borderColor: "rgba(16, 185, 129, 1)",
+                  borderWidth: 1,
+                },
+                {
+                  label: "Actual Yield (q/acre)",
+                  data: actual,
+                  backgroundColor: "rgba(56, 189, 248, 0.6)",
+                  borderColor: "rgba(14, 165, 233, 1)",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { labels: { color: "#e5e7eb" } } },
+              scales: {
+                y: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.15)" } },
+                x: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.1)" } },
+              },
+            },
+          });
+          return () => chartRef.current && chartRef.current.destroy();
+        }, [results]);
+
+        return <canvas ref={canvasRef} className="w-full h-72"></canvas>;
+      }
+
+      function ComparisonBars({ title, labels, values }) {
+        const canvasRef = useRef(null);
+        const chartRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !labels?.length) return;
+          if (chartRef.current) chartRef.current.destroy();
+
+          chartRef.current = new Chart(canvasRef.current, {
+            type: "bar",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: title,
+                  data: values,
+                  backgroundColor: "rgba(99, 102, 241, 0.65)",
+                  borderColor: "rgba(99, 102, 241, 1)",
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { labels: { color: "#e5e7eb" } } },
+              scales: {
+                y: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.15)" } },
+                x: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.1)" } },
+              },
+            },
+          });
+
+          return () => chartRef.current && chartRef.current.destroy();
+        }, [labels, values, title]);
+
+        return <canvas ref={canvasRef} className="w-full h-64"></canvas>;
+      }
+
+      // Rainfall response curve
+      function RainfallCurve({ points }) {
+        const canvasRef = useRef(null);
+        const chartRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !points?.length) return;
+          if (chartRef.current) chartRef.current.destroy();
+
+          const labels = points.map((p) => String(p.rainfall));
+          const values = points.map((p) => p.predicted_yield_quintal_per_acre);
+
+          chartRef.current = new Chart(canvasRef.current, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Predicted Yield (q/acre)",
+                  data: values,
+                  tension: 0.35,
+                  fill: true,
+                  backgroundColor: "rgba(16, 185, 129, 0.15)",
+                  borderColor: "rgba(16, 185, 129, 1)",
+                  pointBackgroundColor: "rgba(16, 185, 129, 1)",
+                  pointRadius: 3,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { labels: { color: "#e5e7eb" } } },
+              scales: {
+                y: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.15)" } },
+                x: {
+                  title: { display: true, text: "Rainfall (mm)", color: "#d1d5db" },
+                  ticks: { color: "#d1d5db" },
+                  grid: { color: "rgba(255,255,255,0.1)" },
+                },
+              },
+            },
+          });
+
+          return () => chartRef.current && chartRef.current.destroy();
+        }, [points]);
+
+        return <canvas ref={canvasRef} className="w-full h-64"></canvas>;
+      }
+
+      function App() {
+        const [entries, setEntries] = useState([createYearRecord(2022), createYearRecord(2023), createYearRecord(2024)]);
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState("");
+        const [result, setResult] = useState(null);
+        const [districtOptionsByState, setDistrictOptionsByState] = useState({});
+
+        const yearsCountLabel = useMemo(() => `${entries.length} years selected`, [entries.length]);
+
+        const updateEntry = (index, field, value) => {
+          setEntries((prev) =>
+            prev.map((row, i) => {
+              if (i !== index) return row;
+              if (field === "state") {
+                // Clear district when state changes to avoid invalid district/state pairs.
+                return { ...row, state: value, district: "" };
+              }
+              return { ...row, [field]: value };
+            })
+          );
+        };
+
+        const fetchDistrictsForState = async (stateValue) => {
+          const stateKey = (stateValue || "").toString().trim().toLowerCase();
+          if (!stateKey) return;
+          if (districtOptionsByState[stateKey]) return; // already loaded
+
+          const response = await fetch(`${API_BASE}/api/districts?state=${encodeURIComponent(stateKey)}`);
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Failed to load districts");
+          setDistrictOptionsByState((prev) => ({ ...prev, [stateKey]: data.districts || [] }));
+        };
+
+        useEffect(() => {
+          const uniqueStates = Array.from(
+            new Set(
+              entries.map((e) => (e.state || "").toString().trim().toLowerCase()).filter((s) => s.length > 0)
+            )
+          );
+          uniqueStates.forEach((s) => {
+            // Fire-and-forget: backend is cached so multiple calls are cheap.
+            fetchDistrictsForState(s).catch((err) => {
+              // Keep UI usable even if districts fail to load.
+              // eslint-disable-next-line no-console
+              console.warn(err);
+            });
+          });
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [entries]);
+
+        const addYear = () => {
+          setError("");
+          setEntries((prev) => {
+            if (prev.length >= 4) return prev;
+            const maxYear = Math.max(...prev.map((p) => Number(p.year) || new Date().getFullYear()));
+            return [...prev, createYearRecord(maxYear + 1)];
+          });
+        };
+
+        const removeYear = (index) => {
+          setError("");
+          setEntries((prev) => (prev.length <= 3 ? prev : prev.filter((_, i) => i !== index)));
+        };
+
+        const submit = async (event) => {
+          event.preventDefault();
+          setError("");
+          setResult(null);
+          if (entries.length < 3 || entries.length > 4) {
+            setError("Please keep yearly inputs between 3 and 4.");
+            return;
+          }
+          for (let i = 0; i < entries.length; i += 1) {
+            const message = validateRecord(entries[i], i);
+            if (message) {
+              setError(message);
+              return;
+            }
+          }
+
+          const payload = {
+            entries: entries.map((row) => ({
+              ...row,
+              year: Number(row.year),
+              temperature: Number(row.temperature),
+              rainfall: Number(row.rainfall),
+              humidity: Number(row.humidity),
+              // Send optional actual yield in quintal/acre to the backend.
+              actual_yield_quintal_per_acre:
+                row.actual_yield_quintal_per_acre === "" ? null : Number(row.actual_yield_quintal_per_acre),
+            })),
+          };
+
+          try {
+            setLoading(true);
+            const response = await fetch(`${API_BASE}/api/predict-recommend`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Prediction failed.");
+            setResult(data);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        return (
+          <div className="relative min-h-screen">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-slate-900/70 to-emerald-950/70 backdrop-blur-[2px]"></div>
+            <main className="relative z-10 mx-auto max-w-7xl px-4 py-10 text-slate-100">
+              <section className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-xl md:p-8">
+                <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <h1 className="text-3xl font-bold md:text-4xl">Smart Crop Yield Prediction & Recommendation</h1>
+                    <p className="mt-2 text-sm text-slate-200 md:text-base">
+                      Professional agricultural dashboard using multi-year climate and field data.
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-4 py-1 text-sm">
+                    {yearsCountLabel}
+                  </span>
+                </div>
+
+                <form onSubmit={submit} className="space-y-6">
+                  {entries.map((entry, index) => (
+                    <article key={index} className="rounded-2xl border border-white/15 bg-slate-900/35 p-4">
+                      <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">Year Block {index + 1}</h2>
+                        <button
+                          type="button"
+                          onClick={() => removeYear(index)}
+                          className="rounded-lg border border-rose-300/40 px-3 py-1 text-xs text-rose-200 transition hover:bg-rose-50/20"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                        {[
+                          ["year", "Year", "number"],
+                          ["district", "District", "text"],
+                          ["temperature", "Temperature (C)", "number"],
+                          ["rainfall", "Rainfall (mm)", "number"],
+                          ["humidity", "Humidity (%)", "number"],
+                          ["actual_yield_quintal_per_acre", "Actual Yield (optional, q/acre)", "number"],
+                        ].map(([field, label, type]) => {
+                          if (field === "district") {
+                            const stateKey = (entry.state || "").toString().trim().toLowerCase();
+                            const options = districtOptionsByState[stateKey] || [];
+                            return (
+                              <label key={field} className="text-sm">
+                                <span className="mb-1 block">{label}</span>
+                                <select
+                                  value={entry[field]}
+                                  onChange={(e) => updateEntry(index, field, e.target.value)}
+                                  disabled={!stateKey || !options.length}
+                                  className="w-full rounded-xl border border-white/20 bg-slate-800/70 px-3 py-2 outline-none ring-emerald-400/0 transition focus:ring-2"
+                                >
+                                  <option value="">{!stateKey ? "Select state first" : "Select district"}</option>
+                                  {options.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                      {opt}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                            );
+                          }
+
+                          return (
+                            <label key={field} className="text-sm">
+                              <span className="mb-1 block">{label}</span>
+                              <input
+                                type={type}
+                                value={entry[field]}
+                                step={type === "number" ? "0.01" : undefined}
+                                onChange={(e) => updateEntry(index, field, e.target.value)}
+                                className="w-full rounded-xl border border-white/20 bg-slate-800/70 px-3 py-2 outline-none ring-emerald-400/0 transition focus:ring-2"
+                              />
+                            </label>
+                          );
+                        })}
+
+                        {[
+                          ["country", "Country", COUNTRY_OPTIONS],
+                          ["state", "State", STATE_OPTIONS],
+                          ["crop", "Crop", CROP_OPTIONS],
+                          ["season", "Season", SEASON_OPTIONS],
+                          ["soil_type", "Soil Type", SOIL_OPTIONS],
+                        ].map(([field, label, options]) => (
+                          <label key={field} className="text-sm">
+                            <span className="mb-1 block">{label}</span>
+                            <select
+                              value={entry[field]}
+                              onChange={(e) => updateEntry(index, field, e.target.value)}
+                              className="w-full rounded-xl border border-white/20 bg-slate-800/70 px-3 py-2 outline-none ring-cyan-400/0 transition focus:ring-2"
+                            >
+                              <option value="">Select {label.toLowerCase()}</option>
+                              {options.map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={addYear}
+                      className="rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:brightness-110"
+                    >
+                      Add Year
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="rounded-xl bg-gradient-to-r from-green-600 to-blue-600 px-5 py-2 font-semibold text-white shadow-lg transition hover:scale-[1.02] hover:brightness-110 disabled:opacity-60"
+                    >
+                      {loading ? "Predicting..." : "Predict & Recommend"}
+                    </button>
+                  </div>
+                </form>
+
+                {error && <p className="mt-4 rounded-lg border border-rose-400/40 bg-rose-500/15 p-3 text-rose-200">{error}</p>}
+                {result?.warning && (
+                  <p className="mt-4 rounded-lg border border-amber-400/40 bg-amber-500/15 p-3 text-amber-100">
+                    {result.warning}
+                  </p>
+                )}
+              </section>
+
+              <section className="mt-8 grid gap-6 lg:grid-cols-2">
+                <article className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-xl">
+                  <h3 className="text-xl font-semibold">Prediction Results</h3>
+                  {!result ? (
+                    <p className="mt-3 text-slate-300">Run prediction to view yearly yield results.</p>
+                  ) : (
+                    <div className="mt-3 space-y-3">
+                      {result.predictions.map((item) => (
+                        <div key={item.year} className="rounded-xl border border-white/15 bg-slate-900/35 p-3">
+                          <p className="font-medium">Year {item.year}</p>
+                          <p className="text-sm text-slate-300">Soil: {item.soil_type} | Crop: {item.crop}</p>
+                          <p className="text-sm text-slate-300">Suitability: {item.suitability}</p>
+                          <p className="text-sm text-slate-300">Rainfall impact: {item.rainfall_impact}</p>
+                          <p className="text-sm text-slate-200">
+                            Predicted Yield: {item.predicted_yield_quintal_per_acre} q/acre
+                          </p>
+                          <p className="text-sm text-slate-300">
+                            Base Yield: {item.base_yield_quintal_per_acre} q/acre
+                          </p>
+                          {item.factor_breakdown && (
+                            <p className="text-sm text-slate-300">
+                              Factors -&gt; Soil: {item.factor_breakdown.soil_factor}, Season: {item.factor_breakdown.season_factor}, CropCompat: {item.factor_breakdown.crop_compatibility_factor}, SeasonCompat: {item.factor_breakdown.season_compatibility_factor}, Climate: {item.factor_breakdown.climate_factor}
+                            </p>
+                          )}
+                          <p className="text-sm text-slate-300">
+                            Actual Yield: {item.actual_yield_quintal_per_acre ?? "Not provided"}
+                          </p>
+                          {item.actual_yield_quintal_per_acre !== null && item.actual_yield_quintal_per_acre !== undefined && (
+                            <>
+                              <p className="text-sm text-slate-300">Error: {item.error_q_per_acre} q/acre</p>
+                              <p className="text-sm text-slate-300">Absolute Error: {item.absolute_error_q_per_acre} q/acre</p>
+                              <p className="text-sm text-slate-200">Accuracy Status: {item.accuracy_status}</p>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                      <div className="rounded-xl border border-emerald-300/35 bg-emerald-500/15 p-3">
+                        <p className="font-semibold">Recommended Crop: {result.recommended_crop}</p>
+                        <p className="text-sm text-emerald-100">
+                          Expected Yield: {result.expected_yield_quintal_per_acre} q/acre
+                        </p>
+                        <p className="text-sm text-emerald-100">Reason: {result.recommendation_reason}</p>
+                      </div>
+                    </div>
+                  )}
+                </article>
+
+                <article className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-xl">
+                  <h3 className="text-xl font-semibold">Yield Trend Dashboard</h3>
+                  {!result ? <p className="mt-3 text-slate-300">Prediction graph appears here.</p> : <YieldChart results={result.predictions} />}
+                </article>
+              </section>
+
+              <section className="mt-8 grid gap-6 lg:grid-cols-2">
+                <article className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-xl">
+                  <h3 className="text-xl font-semibold">Yield vs Crop (same soil)</h3>
+                  {!result?.comparison?.yield_by_crop?.length ? (
+                    <p className="mt-3 text-slate-300">Run prediction to view comparison.</p>
+                  ) : (
+                    <ComparisonBars
+                      title="Predicted Yield (q/acre)"
+                      labels={result.comparison.yield_by_crop.map((x) => x.crop)}
+                      values={result.comparison.yield_by_crop.map((x) => x.predicted_yield_quintal_per_acre)}
+                    />
+                  )}
+                </article>
+
+                <article className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-xl">
+                  <h3 className="text-xl font-semibold">Yield vs Soil (same crop)</h3>
+                  {!result?.comparison?.yield_by_soil?.length ? (
+                    <p className="mt-3 text-slate-300">Run prediction to view comparison.</p>
+                  ) : (
+                    <ComparisonBars
+                      title="Predicted Yield (q/acre)"
+                      labels={result.comparison.yield_by_soil.map((x) => x.soil_type)}
+                      values={result.comparison.yield_by_soil.map((x) => x.predicted_yield_quintal_per_acre)}
+                    />
+                  )}
+                </article>
+              </section>
+
+              <section className="mt-8">
+                <article className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-xl backdrop-blur-xl">
+                  <h3 className="text-xl font-semibold">Rainfall vs Yield (non-linear curve)</h3>
+                  {!result?.comparison?.rainfall_curve?.length ? (
+                    <p className="mt-3 text-slate-300">Run prediction to view rainfall response curve.</p>
+                  ) : (
+                    <RainfallCurve points={result.comparison.rainfall_curve} />
+                  )}
+                </article>
+              </section>
+            </main>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

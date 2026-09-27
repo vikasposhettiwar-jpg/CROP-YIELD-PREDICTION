@@ -1,0 +1,11 @@
+{
+  "best_model": "RandomForestRegressor",
+  "metrics": {
+    "RandomForestRegressor": {
+      "rmse": 0.2012636212078152,
+      "mae": 0.1633077455106603,
+      "r2": 0.9869166430699039
+    }
+  },
+  "training_source": "csv_dataset"
+}

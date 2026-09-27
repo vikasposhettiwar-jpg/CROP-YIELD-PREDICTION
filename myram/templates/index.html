@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Crop Yield Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Smart Crop Yield Prediction & Recommendation</h1>
+        <p class="subtitle">Production-ready mini project with Flask + ML</p>
+
+        <form id="predictionForm">
+          <div class="grid">
+            <label>
+              Temperature (C)
+              <input type="number" step="0.1" id="temperature" required />
+            </label>
+            <label>
+              Rainfall (mm)
+              <input type="number" step="0.1" id="rainfall" required />
+            </label>
+            <label>
+              Humidity (%)
+              <input type="number" step="0.1" id="humidity" required />
+            </label>
+            <label>
+              Soil Type
+              <select id="soil_type" required>
+                <option value="">Select soil type</option>
+                <option value="alluvial">Alluvial</option>
+                <option value="black">Black</option>
+                <option value="red">Red</option>
+                <option value="laterite">Laterite</option>
+                <option value="sandy">Sandy</option>
+                <option value="loamy">Loamy</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit">Predict & Recommend</button>
+        </form>
+      </section>
+
+      <section class="card result-grid">
+        <article>
+          <h2>Prediction</h2>
+          <p id="yieldResult">Waiting for input...</p>
+        </article>
+        <article>
+          <h2>Recommendation</h2>
+          <p id="recommendResult">Waiting for input...</p>
+        </article>
+      </section>
+
+      <section class="card">
+        <h2>Model Comparison Dashboard</h2>
+        <div id="modelCards" class="metric-grid"></div>
+        <img
+          class="chart-img"
+          src="{{ url_for('static', filename='images/model_comparison.png') }}"
+          alt="Model comparison chart"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Explainable AI - Feature Importance</h2>
+        <ul id="featureList" class="feature-list"></ul>
+        <img
+          class="chart-img"
+          src="{{ url_for('static', filename='images/feature_importance.png') }}"
+          alt="Feature importance chart"
+        />
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>
+

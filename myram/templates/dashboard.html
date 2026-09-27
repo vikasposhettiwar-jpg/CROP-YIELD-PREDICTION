@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Crop Yield Prediction</title>
+  <!-- Google Fonts for Outfit and Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+</head>
+<body>
+
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <div class="brand-text">Crop<span>Predict</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="sidebar-link active">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="/prediction" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Prediction
+        </a>
+        <a href="/prediction" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          History
+        </a>
+        <a href="/prediction" class="sidebar-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Reports
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <span class="user-name" id="userName">Farmer Operator</span>
+            <span class="user-role">Console Operator</span>
+          </div>
+        </div>
+        <button class="logout-icon-btn" id="logoutBtn" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="top-bar">
+        <div class="top-bar-title">
+          <h1>System Overview</h1>
+          <p>Real-time analytics and predictive configurations</p>
+        </div>
+        <div class="connection-badge">
+          <span class="live-dot"></span>
+          Flask Server Online
+        </div>
+      </div>
+
+      <div class="dashboard-viewport">
+        <!-- Welcome Card -->
+        <div class="welcome-card fade-in">
+          <div class="welcome-text">
+            <h2>Welcome to Crop Yield Prediction System, <span id="welcomeName">Operator</span></h2>
+            <p>Deploy tree-based regression algorithms trained on historical databases. Input Nitrogen/Phosphorus ratios, rainfall bounds, and temperatures inside the console to forecast yield outputs.</p>
+          </div>
+          <div>
+            <a href="/prediction" class="btn btn-primary">Go to Prediction</a>
+          </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="dashboard-grid fade-in">
+          <!-- Card 1: Total Predictions -->
+          <div class="metric-card">
+            <div class="metric-icon icon-blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="metric-details">
+              <span class="metric-label">Total Predictions</span>
+              <span class="metric-value" id="totalPredictionsVal">12</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Recent Predictions -->
+          <div class="metric-card">
+            <div class="metric-icon icon-green">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="metric-details">
+              <span class="metric-label">Recent Predictions</span>
+              <span class="metric-value">3 Active</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Crop Yield Statistics -->
+          <div class="metric-card">
+            <div class="metric-icon icon-purple">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="metric-details">
+              <span class="metric-label">Model Accuracy R²</span>
+              <span class="metric-value">0.982</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Load auth status and username
+    const isAuth = localStorage.getItem('agri_auth') === 'true';
+    if (!isAuth) {
+      window.location.href = '/login';
+    }
+
+    const username = localStorage.getItem('agri_username') || 'Farmer Operator';
+    document.getElementById('userName').textContent = username;
+    document.getElementById('welcomeName').textContent = username;
+    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+
+    // Setup logout handler
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('agri_auth');
+      localStorage.removeItem('agri_username');
+      window.location.href = '/';
+    });
+
+    // Populate mock predictions counter from local history if any
+    const storedHistory = localStorage.getItem('agri_history');
+    if (storedHistory) {
+      try {
+        const historyData = JSON.parse(storedHistory);
+        document.getElementById('totalPredictionsVal').textContent = historyData.length;
+      } catch(e) {
+        console.error(e);
+      }
+    }
+  </script>
+
+</body>
+</html>

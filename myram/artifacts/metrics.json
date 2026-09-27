@@ -1,0 +1,20 @@
+{
+  "best_model": "GradientBoostingRegressor",
+  "metrics": {
+    "RandomForestRegressor": {
+      "rmse": 0.4890866495826721,
+      "mae": 0.3049833333333352,
+      "r2": 0.9227390148967756
+    },
+    "GradientBoostingRegressor": {
+      "rmse": 0.16369210633032155,
+      "mae": 0.1431927617537768,
+      "r2": 0.991345457818381
+    },
+    "LinearRegression": {
+      "rmse": 1.5032794333037265,
+      "mae": 1.0816768237313592,
+      "r2": 0.2700921129254136
+    }
+  }
+}
